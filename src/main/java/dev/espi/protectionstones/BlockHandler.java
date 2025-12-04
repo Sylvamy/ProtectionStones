@@ -93,9 +93,29 @@ public class BlockHandler {
         Player p = e.getPlayer();
         Block b = e.getBlock();
 
-        // check if the block is a protection stone
-        if (!ProtectionStones.isProtectBlockType(b)) return;
-        PSProtectBlock blockOptions = ProtectionStones.getBlockOptions(b);
+        // First try to match based on the base material type (allowing any block state)
+        // This is needed because when a block is first placed, it may not have the configured states yet
+        String baseMaterial = b.getType().toString();
+        PSProtectBlock blockOptions = null;
+        
+        // Check all configured protection stones to find one with matching base material
+        for (PSProtectBlock psb : ProtectionStones.getInstance().getConfiguredBlocks()) {
+            String configuredBase = psb.type;
+            int bracketIndex = configuredBase.indexOf('[');
+            if (bracketIndex != -1) {
+                configuredBase = configuredBase.substring(0, bracketIndex);
+            }
+            if (configuredBase.equals(baseMaterial)) {
+                blockOptions = psb;
+                break;
+            }
+        }
+        
+        // If no match found with base material, try the standard check
+        if (blockOptions == null) {
+            if (!ProtectionStones.isProtectBlockType(b)) return;
+            blockOptions = ProtectionStones.getBlockOptions(b);
+        }
 
         // check if the item was created by protection stones (stored in custom tag)
         // block must have restrictObtaining enabled for blocking place
