@@ -145,8 +145,9 @@ public class BlockHandler {
         } else {
             // Set the correct block states after placement if configured
             if (blockOptions.blockStates != null) {
+                final PSProtectBlock finalBlockOptions = blockOptions;
                 Bukkit.getScheduler().runTask(ProtectionStones.getInstance(), () -> {
-                    BlockUtil.setBlockWithStates(b, blockOptions.type);
+                    BlockUtil.setBlockWithStates(b, finalBlockOptions.type);
                 });
             }
         }
