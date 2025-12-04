@@ -121,6 +121,13 @@ public class BlockHandler {
         // create region, and cancel if it fails
         if (!createPSRegion(p, b.getLocation(), blockOptions)) {
             e.setCancelled(true);
+        } else {
+            // Set the correct block states after placement if configured
+            if (blockOptions.blockStates != null) {
+                Bukkit.getScheduler().runTask(ProtectionStones.getInstance(), () -> {
+                    BlockUtil.setBlockWithStates(b, blockOptions.type);
+                });
+            }
         }
     }
 
