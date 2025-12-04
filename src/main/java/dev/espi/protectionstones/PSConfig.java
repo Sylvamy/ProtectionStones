@@ -190,9 +190,22 @@ public class PSConfig {
                 // convert toml data into object
                 PSProtectBlock b = new ObjectConverter().toObject(c, PSProtectBlock::new);
 
+                // Parse block states if present (format: MATERIAL[state1=value1,state2=value2])
+                String baseMaterial = b.type;
+                String blockStates = null;
+                int bracketIndex = b.type.indexOf('[');
+                if (bracketIndex != -1) {
+                    baseMaterial = b.type.substring(0, bracketIndex);
+                    int endBracket = b.type.indexOf(']');
+                    if (endBracket != -1 && endBracket > bracketIndex) {
+                        blockStates = b.type.substring(bracketIndex + 1, endBracket);
+                        b.blockStates = blockStates;
+                    }
+                }
+
                 // check if material is valid, and is not a player head (since player heads also have the player name after)
-                if (Material.getMaterial(b.type) == null && !(b.type.startsWith(Material.PLAYER_HEAD.toString()))) {
-                    ProtectionStones.getPluginLogger().warning("Unrecognized material: " + b.type);
+                if (Material.getMaterial(baseMaterial) == null && !(baseMaterial.startsWith(Material.PLAYER_HEAD.toString()))) {
+                    ProtectionStones.getPluginLogger().warning("Unrecognized material: " + baseMaterial);
                     ProtectionStones.getPluginLogger().warning("Block will not be added. Please fix this in your config.");
                     continue;
                 }

@@ -1,0 +1,243 @@
+# Example configuration for using custom block states with Protection Stones
+# This example demonstrates how to use a red mushroom block with specific block states
+# --------------------------------------------------------------------------------------------------
+# You can now specify block states using bracket notation: MATERIAL[state1=value1,state2=value2]
+# For mushroom blocks, common states include: north, south, east, west, up, down (all boolean values)
+type = "RED_MUSHROOM_BLOCK[north=false,south=true,east=true,west=true,up=false,down=false]"
+
+# Another way to refer to the protection stone
+# Can be used for /ps give and /ps get
+# Must be one word (no spaces)
+alias = "mushroom"
+
+# Description of the protection block type
+# Shows up in /ps get menu
+description = "Custom mushroom block protection zone."
+
+# Whether or not to restrict obtaining of the protection stone to only /ps get and /ps give and custom crafting recipes.
+# Other ways to obtain this block (ex. mining) will not work as a protection stone.
+# Useful to allow the protection block to only be obtained from a shop or command.
+# Set to "false" if you want to allow players to obtain a protection stone naturally
+restrict_obtaining = true
+
+# Enable or disable the use of this protection stone in specific worlds
+# "blacklist" mode prevents this protect block from being used in the worlds in "worlds"
+# "whitelist" mode allows this protect block to only be used in the worlds in "worlds"
+# Can be overriden with protectionstones.admin permission (including OP)!
+world_list_type = "blacklist"
+worlds = [
+    "exampleworld1",
+    "exampleworld2"
+]
+
+# Whether or not to actually restrict the protection stone from being placed when the world is restricted (in blacklist/whitelist)
+# The block will place normally, without PS behaviour.
+prevent_block_place_in_restricted_world = true
+
+# Whether or not to allow the block to be placed in the wild.
+# If set to false, the protection block can only be placed in existing regions.
+allow_placing_in_wild = true
+
+# Whether or not to allow the block to bypass the WorldGuard passthrough flag.
+# This allows the protection block to be placed even if WorldGuard prevents block placing in the wild.
+placing_bypasses_wg_passthrough = true
+
+[region]
+    # Minimum distance between claims (that aren't owned by the same owner), measured from the protection block to the edge of another region
+    # You will probably have to change this between blocks, since the region sizes will be different
+    # Set to -1 for no minimum, but will still check for overlapping regions
+    distance_between_claims = -1
+
+    # How large the default protection region is in the horizontal (x, z) directions
+    # You can make a protect block protect an entire chunk using the chunk radius option below
+    x_radius = 32
+    z_radius = 32
+
+    # How large the default protection region is in the vertical (y) direction
+    # Set to -1 to extend to the build limit (y: 0-255)
+    y_radius = -1
+
+    # Protection radius, in chunks
+    # Set to -1 to disable chunk based protection, and use x_radius, z_radius instead
+    # Note: setting this will override x_radius and z_radius for this block
+    chunk_radius = -1
+
+    # Specify the default home location of the protected region as an offset from the protection block
+    # The default is the block itself (y+1 means 1 block above protection block)
+    home_x_offset = 0.0
+    home_y_offset = 1.0
+    home_z_offset = 0.0
+
+    # Set the default flags to be set when a new protected region is created.
+    # Can also be used to override WorldGuard's default flag values for protected regions.
+    # Example: "pvp deny", "greeting ??aWelcome!!"
+    # You can use color codes with & or section symbol
+    # Use a space to specify a space in the flag value
+    flags = []
+
+    # Which flags are allowed to be set by region owners through /ps flag
+    # If you want owners to be able to set all flags, set to ["__all__"]
+    # If you want owners to not be able to set any flags, set to []
+    # Example: "pvp", "tnt", "greeting"
+    allowed_flags = []
+
+    # Hide flags from /ps info (so players can't see them)
+    hidden_flags_from_info = []
+
+    # Set the priority of the protection region
+    # Useful if you want to have overlapping regions, the one with the higher priority will have precedence
+    priority = 0
+
+    # If this is set to true, players can place protection blocks that overlap unowned regions.
+    # Otherwise, players will not be able to place blocks in unowned regions (even if the unowned regions allow).
+    allow_overlap_unowned_regions = false
+
+    # How WorldGuard determines if a block can be placed if another region overlaps the new region
+    # Options:
+    # ALLOW - Can overlap any region, all flag checks are ignored
+    # DENY - Cannot overlap any region
+    # GLOBAL_PASSTHROUGH - Can overlap any region with the passthrough flag set to allow
+    # OWNER_PASSTHROUGH - Can overlap regions the player is an owner or member of, or has passthrough allow
+    allow_other_regions_to_overlap = "DENY"
+
+    # Whether or not to allow merging of this protection block type
+    allow_merging = false
+
+    # Which protection block types this protection block can be merged with
+    # If you want to be able to merge with all types, set to ["__all__"]
+    # If you want to merge with no types, set to []
+    allowed_merging_into_types = []
+
+[block_data]
+    # Name given to the protection block item when received from /ps get or /ps give
+    # Leave as "" for no name
+    display_name = "??l??5Mushroom Protection Stone"
+
+    # Lore given to the protection block item when received from /ps get or /ps give
+    # Leave as [] for no lore
+    lore = [
+        "??6Custom mushroom block",
+        "??7Place to create a protected area"
+    ]
+
+    # Whether or not to apply an enchanted glow effect to the item (uses Lure I, and hides enchantments)
+    enchanted_effect = true
+
+    # Price to obtain the protection stone when /ps get is used
+    # Set to -1 to disable price
+    price = -1.0
+
+    # Whether or not to allow crafting this protection stone
+    # You can specify the recipe using the custom_recipe option below
+    allow_craft_with_custom_recipe = false
+
+    # Specify the crafting recipe for this protection stone
+    # Format: each list is a row of the crafting grid (3x3)
+    # Use the Material name for items, or "?" for empty slots
+    # Example:
+    # custom_recipe = [
+    #     ["STONE", "STONE", "STONE"],
+    #     ["STONE", "EMERALD", "STONE"],
+    #     ["STONE", "STONE", "STONE"]
+    # ]
+    custom_recipe = []
+
+    # How many protection stones are given from crafting
+    recipe_amount = 1
+
+    # Custom model data for the protection stone item
+    # Set to -1 to disable
+    # This allows you to use resource packs to change the item's appearance
+    custom_model_data = -1
+
+[economy]
+    # Amount to tax the player per tax cycle (in dollars)
+    # Set to -1 to disable taxing for this region
+    tax_amount = -1.0
+
+    # How often to tax the player (in seconds)
+    # Set to -1 for a one time tax payment
+    tax_period = -1
+
+    # The time (in seconds) until the next tax payment is due for new regions
+    tax_payment_time = 86400
+
+    # Whether or not new regions should start with tax auto-payment enabled
+    start_with_tax_autopay = false
+
+    # The role to be given to the tenant when renting this region
+    tenant_rent_role = ""
+
+    # Whether or not the landlord is still owner when the region is rented
+    landlord_still_owner = true
+
+[behaviour]
+    # Whether or not the protection block is automatically hidden when placed
+    auto_hide = false
+
+    # Whether or not the protection block should automatically merge into adjacent regions, if possible
+    auto_merge = false
+
+    # Whether or not to prevent the region block from dropping if it would otherwise drop (ex. piston push, tnt)
+    no_drop = false
+
+    # Whether or not to prevent pistons from pushing the protection block
+    prevent_piston_push = false
+
+    # Whether or not to prevent explosions from destroying the protection block
+    prevent_explode = false
+
+    # Whether or not to destroy the protection region when the protection block is destroyed by an explosion
+    # If prevent_explode is true, this option does nothing
+    destroy_region_when_explode = false
+
+    # Prevent silk touch enchantment from being used to obtain the protection block
+    prevent_silk_touch = false
+
+    # Cost to place the protection stone
+    # Set to -1 to disable
+    cost_to_place = -1.0
+
+    # Whether or not to allow the protection stone to be smelted in a furnace
+    allow_smelt_item = false
+
+    # Whether or not to allow the protection stone to be used in crafting recipes (ex. a crafting ingredient)
+    allow_use_in_crafting = false
+
+[player]
+    # Whether or not to allow players to shift-right click the protection block to break it
+    # This is useful for when a player wants to remove the protection block quickly
+    allow_shift_right_break = false
+
+    # Whether or not to prevent teleportation into this region (via ender pearl, chorus fruit, etc.)
+    # Note: does not prevent /ps home or /ps tp
+    prevent_teleport_in = false
+
+    # Whether or not to prevent moving while waiting for teleport (for /ps home or /ps tp)
+    no_moving_when_tp_waiting = true
+
+    # The amount of time (in seconds) to wait before teleporting the player to the region (for /ps home or /ps tp)
+    tp_waiting_seconds = 0
+
+    # Prevent players from using /ps get to obtain this protection block
+    prevent_ps_get = false
+
+    # Prevent players from using /ps home to teleport to this region
+    prevent_ps_home = false
+
+    # Permission required to place this protection block
+    # Set to "" to not require a permission
+    # Format: "protectionstones.PERMISSION"
+    permission = ""
+
+[event]
+    # Enable event commands (commands to be run when a region is created or destroyed)
+    enable = false
+
+    # Commands to run when a region is created with this protection block
+    # Placeholders: %player%, %world%, %region%, %block_x%, %block_y%, %block_z%
+    on_region_create = []
+
+    # Commands to run when a region is destroyed with this protection block
+    # Placeholders: %player%, %world%, %region%, %block_x%, %block_y%, %block_z%
+    on_region_destroy = []

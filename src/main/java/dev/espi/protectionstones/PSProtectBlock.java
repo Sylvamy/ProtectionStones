@@ -39,6 +39,10 @@ public class PSProtectBlock {
     public String type, alias;
     @Path("description")
     public String description;
+    
+    // non-config field to store block states (e.g., "north=false,south=true")
+    // extracted from type field during initialization
+    public transient String blockStates = null;
     @Path("restrict_obtaining")
     public boolean restrictObtaining;
     @Path("world_list_type")

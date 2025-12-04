@@ -604,7 +604,8 @@ public abstract class PSRegion {
                     BlockUtil.setHeadType(getType(), getProtectBlock());
                 }
             } else {
-                getProtectBlock().setType(Material.getMaterial(getType()));
+                // Use new method to handle block states
+                BlockUtil.setBlockWithStates(getProtectBlock(), getType());
             }
             return true;
         } else {
@@ -644,10 +645,15 @@ public abstract class PSRegion {
      */
     public void setType(PSProtectBlock type) {
         if (!isHidden()) {
-            Material set = Material.matchMaterial(type.type) == null ? Material.PLAYER_HEAD : Material.matchMaterial(type.type);
-            getProtectBlock().setType(set);
-            if (type.type.startsWith("PLAYER_HEAD") && type.type.split(":").length > 1) {
-                BlockUtil.setHeadType(type.type, getProtectBlock());
+            if (type.type.startsWith("PLAYER_HEAD")) {
+                Material set = Material.matchMaterial(type.type) == null ? Material.PLAYER_HEAD : Material.matchMaterial(type.type);
+                getProtectBlock().setType(set);
+                if (type.type.split(":").length > 1) {
+                    BlockUtil.setHeadType(type.type, getProtectBlock());
+                }
+            } else {
+                // Use new method to handle block states
+                BlockUtil.setBlockWithStates(getProtectBlock(), type.type);
             }
         }
     }

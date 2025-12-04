@@ -38,16 +38,93 @@ import java.util.Base64;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.bukkit.block.data.BlockData;
 
 public class BlockUtil {
     static final int MAX_USERNAME_LENGTH = 16;
     public static HashMap<String, String> uuidToBase64Head = new HashMap<>();
+    
+    /**
+     * Get block state string from block data
+     * @param block the block to get states from
+     * @return block state string in format "key1=value1,key2=value2" or null if no relevant states
+     */
+    public static String getBlockStates(Block block) {
+        BlockData blockData = block.getBlockData();
+        String blockDataStr = blockData.getAsString();
+        
+        // Extract states from format "minecraft:material[state1=value1,state2=value2]"
+        int startBracket = blockDataStr.indexOf('[');
+        int endBracket = blockDataStr.indexOf(']');
+        
+        if (startBracket != -1 && endBracket != -1 && endBracket > startBracket) {
+            return blockDataStr.substring(startBracket + 1, endBracket);
+        }
+        return null;
+    }
+    
+    /**
+     * Check if two block state strings match
+     * @param states1 first state string
+     * @param states2 second state string
+     * @return true if they match or both are null
+     */
+    public static boolean blockStatesMatch(String states1, String states2) {
+        if (states1 == null && states2 == null) return true;
+        if (states1 == null || states2 == null) return false;
+        return states1.equals(states2);
+    }
+    
+    /**
+     * Set block type with optional block states
+     * @param block the block to set
+     * @param psType the protection stone type string (e.g., "RED_MUSHROOM_BLOCK[north=false,south=true]")
+     */
+    public static void setBlockWithStates(Block block, String psType) {
+        // Extract base material and states
+        String baseMaterial = psType;
+        String blockStates = null;
+        
+        int bracketIndex = psType.indexOf('[');
+        if (bracketIndex != -1) {
+            baseMaterial = psType.substring(0, bracketIndex);
+            int endBracket = psType.indexOf(']');
+            if (endBracket != -1 && endBracket > bracketIndex) {
+                blockStates = psType.substring(bracketIndex + 1, endBracket);
+            }
+        }
+        
+        // Set the material
+        Material material = Material.getMaterial(baseMaterial);
+        if (material != null) {
+            if (blockStates != null) {
+                // Create block data string in Minecraft format
+                String blockDataString = "minecraft:" + baseMaterial.toLowerCase() + "[" + blockStates + "]";
+                try {
+                    BlockData blockData = Bukkit.createBlockData(blockDataString);
+                    block.setBlockData(blockData);
+                } catch (IllegalArgumentException e) {
+                    // If parsing fails, just set the material
+                    block.setType(material);
+                }
+            } else {
+                block.setType(material);
+            }
+        }
+    }
 
     public static ItemStack getProtectBlockItemFromType(String type) {
-        if (type.startsWith(Material.PLAYER_HEAD.toString())) {
+        // Extract base material if block states are present
+        String baseMaterial = type;
+        int bracketIndex = type.indexOf('[');
+        if (bracketIndex != -1) {
+            baseMaterial = type.substring(0, bracketIndex);
+        }
+        
+        if (baseMaterial.startsWith(Material.PLAYER_HEAD.toString())) {
             return new ItemStack(Material.PLAYER_HEAD);
         } else {
-            return new ItemStack(Material.getMaterial(type));
+            return new ItemStack(Material.getMaterial(baseMaterial));
         }
     }
 
@@ -82,6 +159,8 @@ public class BlockUtil {
     }
 
     public static String getProtectBlockType(Block block) {
+        String baseType;
+        
         if (block.getType() == Material.PLAYER_HEAD || block.getType() == Material.PLAYER_WALL_HEAD) {
 
             Skull s = (Skull) block.getState();
@@ -89,27 +168,38 @@ public class BlockUtil {
                 OfflinePlayer op = s.getOwningPlayer();
                 if (ProtectionStones.getBlockOptions("PLAYER_HEAD:" + op.getUniqueId()) != null) {
                     // PLAYER_HEAD:base64
-                    return Material.PLAYER_HEAD + ":" + op.getUniqueId();
+                    baseType = Material.PLAYER_HEAD + ":" + op.getUniqueId();
                 } else {
                     // PLAYER_HEAD:name
-                    return Material.PLAYER_HEAD + ":" + op.getName(); // return name if doesn't exist
+                    baseType = Material.PLAYER_HEAD + ":" + op.getName(); // return name if doesn't exist
                 }
             } else { // PLAYER_HEAD
-                return Material.PLAYER_HEAD.toString();
+                baseType = Material.PLAYER_HEAD.toString();
             }
         } else if (block.getType() == Material.CREEPER_WALL_HEAD) {
-            return Material.CREEPER_HEAD.toString();
+            baseType = Material.CREEPER_HEAD.toString();
         } else if (block.getType() == Material.DRAGON_WALL_HEAD) {
-            return Material.DRAGON_HEAD.toString();
+            baseType = Material.DRAGON_HEAD.toString();
         } else if (block.getType() == Material.ZOMBIE_WALL_HEAD) {
-            return Material.ZOMBIE_HEAD.toString();
+            baseType = Material.ZOMBIE_HEAD.toString();
         } else if (block.getType() == Material.SKELETON_WALL_SKULL) {
-            return Material.SKELETON_SKULL.toString();
+            baseType = Material.SKELETON_SKULL.toString();
         } else if (block.getType() == Material.WITHER_SKELETON_WALL_SKULL) {
-            return Material.WITHER_SKELETON_SKULL.toString();
+            baseType = Material.WITHER_SKELETON_SKULL.toString();
         } else {
-            return block.getType().toString();
+            baseType = block.getType().toString();
         }
+        
+        // Check if there's a configured block with states for this material
+        String blockStates = getBlockStates(block);
+        if (blockStates != null) {
+            String typeWithStates = baseType + "[" + blockStates + "]";
+            if (ProtectionStones.getBlockOptions(typeWithStates) != null) {
+                return typeWithStates;
+            }
+        }
+        
+        return baseType;
     }
 
     public static void setHeadType(String psType, Block b) {
