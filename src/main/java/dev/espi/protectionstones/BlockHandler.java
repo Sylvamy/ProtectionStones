@@ -107,6 +107,7 @@ public class BlockHandler {
             }
             if (configuredBase.equals(baseMaterial)) {
                 blockOptions = psb;
+                ProtectionStones.getPluginLogger().info("Found matching protection stone: " + psb.type + " for block: " + baseMaterial);
                 break;
             }
         }
@@ -143,12 +144,17 @@ public class BlockHandler {
         if (!createPSRegion(p, b.getLocation(), blockOptions)) {
             e.setCancelled(true);
         } else {
+            ProtectionStones.getPluginLogger().info("Region created successfully, setting block states...");
             // Set the correct block states after placement if configured
             if (blockOptions.blockStates != null) {
+                ProtectionStones.getPluginLogger().info("Block has states: " + blockOptions.blockStates);
                 final PSProtectBlock finalBlockOptions = blockOptions;
                 Bukkit.getScheduler().runTask(ProtectionStones.getInstance(), () -> {
+                    ProtectionStones.getPluginLogger().info("Setting block to: " + finalBlockOptions.type);
                     BlockUtil.setBlockWithStates(b, finalBlockOptions.type);
                 });
+            } else {
+                ProtectionStones.getPluginLogger().info("No block states configured for this protection stone");
             }
         }
     }
