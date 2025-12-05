@@ -258,7 +258,23 @@ public class ProtectionStones extends JavaPlugin {
      * @return the config options for the protect block specified (null if not found)
      */
     public static PSProtectBlock getBlockOptions(String blockType) {
-        return protectionStonesOptions.get(blockType);
+        // First try exact match
+        PSProtectBlock exactMatch = protectionStonesOptions.get(blockType);
+        if (exactMatch != null) return exactMatch;
+        
+        // If no exact match, try matching by base material (for block states)
+        for (PSProtectBlock psb : protectionStonesOptions.values()) {
+            String configuredBase = psb.type;
+            int bracketIndex = configuredBase.indexOf('[');
+            if (bracketIndex != -1) {
+                configuredBase = configuredBase.substring(0, bracketIndex);
+            }
+            if (configuredBase.equals(blockType)) {
+                return psb;
+            }
+        }
+        
+        return null;
     }
 
     public static boolean isProtectBlockType(Block b) {
