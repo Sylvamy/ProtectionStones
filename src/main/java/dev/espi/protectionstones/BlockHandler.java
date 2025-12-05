@@ -120,9 +120,13 @@ public class BlockHandler {
 
         // check if the item was created by protection stones (stored in custom tag)
         // block must have restrictObtaining enabled for blocking place
-        if (blockOptions.restrictObtaining && !ProtectionStones.isProtectBlockItem(e.getItemInHand(), true)) {
-            ProtectionStones.getPluginLogger().info("Block placement blocked: restrictObtaining is enabled and item is not a valid PS item");
-            return;
+        if (blockOptions.restrictObtaining) {
+            boolean isValidItem = ProtectionStones.isProtectBlockItem(e.getItemInHand(), true);
+            ProtectionStones.getPluginLogger().info("restrictObtaining check - Item type: " + e.getItemInHand().getType() + ", Valid: " + isValidItem);
+            if (!isValidItem) {
+                ProtectionStones.getPluginLogger().info("Block placement blocked: restrictObtaining is enabled and item is not a valid PS item");
+                return;
+            }
         }
 
         // check if player has toggled off placement of protection stones

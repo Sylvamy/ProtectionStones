@@ -5,22 +5,22 @@
 # To use custom player heads, you need the base64 value of the head. On minecraft-heads.com, you will find this value in the Other section under "Value:".
 # To use UUIDs for player heads, go to https://sessionserver.mojang.com/session/minecraft/profile/PUT-UUID-HERE and copy the value from the "value" field not including quotes.
 # When you have the value, you can set the type to "PLAYER_HEAD:value"
-type = "EMERALD_ORE"
+type = "RED_MUSHROOM_BLOCK[north=true,south=true,east=false,west=false,up=false,down=false]"
 
 # Another way to refer to the protection stone
 # Can be used for /ps give and /ps get
 # Must be one word (no spaces)
-alias = "64"
+alias = "mushroom"
 
 # Description of the protection block type
 # Shows up in /ps get menu
-description = "64 block radius protection zone."
+description = "Protects the chunk its placed in."
 
 # Whether or not to restrict obtaining of the protection stone to only /ps get and /ps give and custom crafting recipes.
 # Other ways to obtain this block (ex. mining) will not work as a protection stone.
 # Useful to allow the protection block to only be obtained from a shop or command.
 # Set to "false" if you want to allow players to obtain a protection stone naturally
-restrict_obtaining = true
+restrict_obtaining = false
 
 # Enable or disable the use of this protection stone in specific worlds
 # "blacklist" mode prevents this protect block from being used in the worlds in "worlds"
@@ -63,7 +63,7 @@ placing_bypasses_wg_passthrough = true
     # regions (as they all conform to chunk boundaries).
     # Set to -1 to disable, and any number larger than or equal to 1 to enable.
     # Note: If enabled, x_radius and z_radius will be ignored!
-    chunk_radius = -1
+    chunk_radius = 1
 
     # How many blocks to offset the default location of /ps home from the protection block
     home_x_offset = 0.0
@@ -76,10 +76,8 @@ placing_bypasses_wg_passthrough = true
     flags = [
         "pvp deny",
         "tnt deny",
-        "greeting &lEntering &b&l%player%'s &f&lprotected area",
-        "farewell &lLeaving &b&l%player%'s &f&lprotected area",
-        "greeting-action &lEntering &b&l%player%'s &f&lprotected area",
-        "farewell-action &lLeaving &b&l%player%'s &f&lprotected area",
+        "greeting &8[&aEntering %player%'s protected area&8]",
+        "farewell &8[&cLeaving %player%'s protected area&8]",
         "creeper-explosion deny",
         "wither-damage deny",
         "ghast-fireball deny",
@@ -150,13 +148,13 @@ placing_bypasses_wg_passthrough = true
     # Name given to protection block when obtained with /ps give or /ps get
     # Also affects custom crafted items (see custom_recipe)
     # Leave as '' for no name
-    display_name = "&a&m<---&r&b 64 Radius Protection Block &r&a&m--->"
+    display_name = "&bProtection Block"
 
     # Lore given to protection block when obtained with /ps give or /ps get
     # Also affects custom crafted items (see custom_recipe)
     # Leave as [] for no lore
     lore = [
-        "&6(⌐■_■)ノ♪ Nobody's going to touch my stuff!",
+        "&7Protects the chunk its placed in.",
     ]
 
     # Whether the item should have an "glow/enchant" effect look when in a player's inventory.
@@ -169,7 +167,7 @@ placing_bypasses_wg_passthrough = true
 
     # Whether or not to allow crafting this item using a custom recipe
     # Useful to allow crafting the item when restrict_obtaining is set to true
-    allow_craft_with_custom_recipe = false
+    allow_craft_with_custom_recipe = true
     # Specify the custom crafting recipe below
     # You must fill the item spots with names from here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
     # You can also use other protection stone items as ingredients in the recipe, in the format PROTECTION_STONES:alias
@@ -177,14 +175,14 @@ placing_bypasses_wg_passthrough = true
     # If you want air, you can just leave the spot as ""
     custom_recipe = [
         ["", "STONE", ""],
-        ["STONE", "EMERALD", "STONE"],
+        ["STONE", "COPPER_INGOT", "STONE"],
         ["", "STONE", ""]
     ]
     # Amount of the protection item to give when crafted
     recipe_amount = 1
 
     # The custom model data of the block item, useful for resource packs. Set to -1 to disable.
-    custom_model_data = -1
+    custom_model_data = 1
 
 [economy]
     # Taxes must be enabled in config.toml first (tax_enabled)
@@ -212,7 +210,7 @@ placing_bypasses_wg_passthrough = true
     auto_hide = false
 
     # Whether or not to automatically merge into other regions when placed if there is only one overlapping and allow_merging is true
-    auto_merge = false
+    auto_merge = true
 
     # Disable returning the block when removed/unclaimed?
     no_drop = false

@@ -68,7 +68,13 @@ public class RecipeUtil {
     }
 
     public static NamespacedKey getNamespacedKeyForBlock(PSProtectBlock block) {
-        return new NamespacedKey(ProtectionStones.getInstance(), block.type.replaceAll("[+/=:]", ""));
+        // Remove all characters that aren't allowed in NamespacedKey: only [a-z0-9_-./] are allowed
+        // Remove block states and sanitize the string
+        String sanitized = block.type
+            .replaceAll("\\[.*?\\]", "") // Remove block states [...]
+            .replaceAll("[^a-z0-9_\\-./]", "") // Remove any other invalid characters
+            .toLowerCase(); // Ensure lowercase
+        return new NamespacedKey(ProtectionStones.getInstance(), sanitized);
     }
 
     public static ShapedRecipe parseRecipe(PSProtectBlock block) {
