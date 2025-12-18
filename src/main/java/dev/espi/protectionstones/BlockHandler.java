@@ -93,45 +93,17 @@ public class BlockHandler {
         Player p = e.getPlayer();
         Block b = e.getBlock();
 
-        // First try to match based on the base material type (allowing any block state)
-        // This is needed because when a block is first placed, it may not have the configured states yet
-        String baseMaterial = b.getType().toString();
-        PSProtectBlock blockOptions = null;
+        // First check if the item in hand is a valid protection stone item
+        // This uses the getBlockOptions method which checks both type and NBT tag if restrictObtaining is enabled
+        PSProtectBlock blockOptions = ProtectionStones.getBlockOptions(e.getItemInHand());
         
-        // Check all configured protection stones to find one with matching base material
-        for (PSProtectBlock psb : ProtectionStones.getInstance().getConfiguredBlocks()) {
-            String configuredBase = psb.type;
-            int bracketIndex = configuredBase.indexOf('[');
-            if (bracketIndex != -1) {
-                configuredBase = configuredBase.substring(0, bracketIndex);
-            }
-            if (configuredBase.equals(baseMaterial)) {
-                blockOptions = psb;
-                ProtectionStones.getPluginLogger().info("Found matching protection stone: " + psb.type + " for block: " + baseMaterial);
-                break;
-            }
-        }
-        
-        // If no match found with base material, try the standard check
+        // If the item is not a valid protection stone, return early
         if (blockOptions == null) {
-            if (!ProtectionStones.isProtectBlockType(b)) return;
-            blockOptions = ProtectionStones.getBlockOptions(b);
-        }
-
-        // check if the item was created by protection stones (stored in custom tag)
-        // block must have restrictObtaining enabled for blocking place
-        if (blockOptions.restrictObtaining) {
-            boolean isValidItem = ProtectionStones.isProtectBlockItem(e.getItemInHand(), true);
-            ProtectionStones.getPluginLogger().info("restrictObtaining check - Item type: " + e.getItemInHand().getType() + ", Valid: " + isValidItem);
-            if (!isValidItem) {
-                ProtectionStones.getPluginLogger().info("Block placement blocked: restrictObtaining is enabled and item is not a valid PS item");
-                return;
-            }
+            return;
         }
 
         // check if player has toggled off placement of protection stones
         if (ProtectionStones.toggleList.contains(p.getUniqueId())) {
-            ProtectionStones.getPluginLogger().info("Block placement blocked: player has toggled off PS placement");
             return;
         }
 
@@ -154,17 +126,12 @@ public class BlockHandler {
         if (!createPSRegion(p, b.getLocation(), blockOptions)) {
             e.setCancelled(true);
         } else {
-            ProtectionStones.getPluginLogger().info("Region created successfully, setting block states...");
             // Set the correct block states after placement if configured
             if (blockOptions.blockStates != null) {
-                ProtectionStones.getPluginLogger().info("Block has states: " + blockOptions.blockStates);
                 final PSProtectBlock finalBlockOptions = blockOptions;
                 Bukkit.getScheduler().runTask(ProtectionStones.getInstance(), () -> {
-                    ProtectionStones.getPluginLogger().info("Setting block to: " + finalBlockOptions.type);
                     BlockUtil.setBlockWithStates(b, finalBlockOptions.type);
                 });
-            } else {
-                ProtectionStones.getPluginLogger().info("No block states configured for this protection stone");
             }
         }
     }
