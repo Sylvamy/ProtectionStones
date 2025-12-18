@@ -93,8 +93,11 @@ public class BlockHandler {
         Player p = e.getPlayer();
         Block b = e.getBlock();
 
-        // Get the base material type of the placed block
-        String baseMaterial = b.getType().toString();
+        // Get the item in hand - this is what we need to validate
+        ItemStack itemInHand = e.getItemInHand();
+        
+        // Get the base material type of the item in hand
+        String itemBaseMaterial = itemInHand.getType().toString();
         PSProtectBlock blockOptions = null;
         
         // Check all configured protection stones to find one with matching base material
@@ -104,22 +107,26 @@ public class BlockHandler {
             if (bracketIndex != -1) {
                 configuredBase = configuredBase.substring(0, bracketIndex);
             }
-            if (configuredBase.equals(baseMaterial)) {
-                blockOptions = psb;
-                break;
+            if (configuredBase.equals(itemBaseMaterial)) {
+                // Found a matching base material - now check if this specific item is valid
+                if (psb.restrictObtaining) {
+                    // Must have the NBT tag to be valid
+                    if (ProtectionStones.isProtectBlockItem(itemInHand, true)) {
+                        blockOptions = psb;
+                        break;
+                    }
+                    // else continue checking other configs
+                } else {
+                    // No restriction, any item of this material works
+                    blockOptions = psb;
+                    break;
+                }
             }
         }
         
-        // If no matching protection stone config found, return early
+        // If no valid protection stone found, return early (don't create region)
         if (blockOptions == null) {
             return;
-        }
-
-        // If restrictObtaining is enabled, verify the item has the protection stone NBT tag
-        if (blockOptions.restrictObtaining) {
-            if (!ProtectionStones.isProtectBlockItem(e.getItemInHand(), true)) {
-                return;
-            }
         }
 
         // check if player has toggled off placement of protection stones
