@@ -38,6 +38,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.tags.CustomItemTagContainer;
+import org.bukkit.inventory.meta.tags.ItemTagType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,12 +104,37 @@ public class BlockHandler {
             return;
         }
         
+        // First, verify the item has the protection stone NBT tag
+        // This prevents regular blocks from creating regions
+        if (itemInHand.getItemMeta() == null) {
+            return;
+        }
+        
+        boolean hasProtectionStoneTag = false;
+        try {
+            CustomItemTagContainer tagContainer = itemInHand.getItemMeta().getCustomTagContainer();
+            Byte isPSBlock = tagContainer.getCustomTag(new NamespacedKey(ProtectionStones.getInstance(), "isPSBlock"), ItemTagType.BYTE);
+            hasProtectionStoneTag = isPSBlock != null && isPSBlock == 1;
+        } catch (IllegalArgumentException es) {
+            try {
+                // Check for legacy string format
+                CustomItemTagContainer tagContainer = itemInHand.getItemMeta().getCustomTagContainer();
+                String isPSBlock = tagContainer.getCustomTag(new NamespacedKey(ProtectionStones.getInstance(), "isPSBlock"), ItemTagType.STRING);
+                hasProtectionStoneTag = isPSBlock != null && isPSBlock.equals("true");
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        
+        // If the item doesn't have the PS NBT tag, don't create a region
+        if (!hasProtectionStoneTag) {
+            return;
+        }
+        
         // Get the base material type of the item in hand
         String itemBaseMaterial = itemInHand.getType().toString();
         PSProtectBlock blockOptions = null;
         
         // Check all configured protection stones to find one with matching base material
-        // AND has the protection stone NBT tag (always required for placement)
         for (PSProtectBlock psb : ProtectionStones.getInstance().getConfiguredBlocks()) {
             String configuredBase = psb.type;
             int bracketIndex = configuredBase.indexOf('[');
@@ -115,17 +142,12 @@ public class BlockHandler {
                 configuredBase = configuredBase.substring(0, bracketIndex);
             }
             if (configuredBase.equals(itemBaseMaterial)) {
-                // Found a matching base material - now check if this item has the PS NBT tag
-                // Always check NBT to prevent regular blocks from creating regions
-                if (ProtectionStones.isProtectBlockItem(itemInHand, true)) {
-                    blockOptions = psb;
-                    break;
-                }
-                // Item doesn't have NBT tag, continue checking other configs
+                blockOptions = psb;
+                break;
             }
         }
         
-        // If no valid protection stone found, return early (don't create region)
+        // If no matching protection stone config found, return early
         if (blockOptions == null) {
             return;
         }
