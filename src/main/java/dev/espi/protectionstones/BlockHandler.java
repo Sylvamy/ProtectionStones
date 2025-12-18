@@ -93,13 +93,33 @@ public class BlockHandler {
         Player p = e.getPlayer();
         Block b = e.getBlock();
 
-        // First check if the item in hand is a valid protection stone item
-        // This uses the getBlockOptions method which checks both type and NBT tag if restrictObtaining is enabled
-        PSProtectBlock blockOptions = ProtectionStones.getBlockOptions(e.getItemInHand());
+        // Get the base material type of the placed block
+        String baseMaterial = b.getType().toString();
+        PSProtectBlock blockOptions = null;
         
-        // If the item is not a valid protection stone, return early
+        // Check all configured protection stones to find one with matching base material
+        for (PSProtectBlock psb : ProtectionStones.getInstance().getConfiguredBlocks()) {
+            String configuredBase = psb.type;
+            int bracketIndex = configuredBase.indexOf('[');
+            if (bracketIndex != -1) {
+                configuredBase = configuredBase.substring(0, bracketIndex);
+            }
+            if (configuredBase.equals(baseMaterial)) {
+                blockOptions = psb;
+                break;
+            }
+        }
+        
+        // If no matching protection stone config found, return early
         if (blockOptions == null) {
             return;
+        }
+
+        // If restrictObtaining is enabled, verify the item has the protection stone NBT tag
+        if (blockOptions.restrictObtaining) {
+            if (!ProtectionStones.isProtectBlockItem(e.getItemInHand(), true)) {
+                return;
+            }
         }
 
         // check if player has toggled off placement of protection stones
