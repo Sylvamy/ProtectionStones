@@ -20,7 +20,7 @@ description = "Protects the chunk its placed in."
 # Other ways to obtain this block (ex. mining) will not work as a protection stone.
 # Useful to allow the protection block to only be obtained from a shop or command.
 # Set to "false" if you want to allow players to obtain a protection stone naturally
-restrict_obtaining = false
+restrict_obtaining = true
 
 # Enable or disable the use of this protection stone in specific worlds
 # "blacklist" mode prevents this protect block from being used in the worlds in "worlds"

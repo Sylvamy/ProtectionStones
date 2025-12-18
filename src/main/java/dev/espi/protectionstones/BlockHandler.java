@@ -97,11 +97,17 @@ public class BlockHandler {
         // Get the item in hand - this is what we need to validate
         ItemStack itemInHand = e.getItemInHand();
         
+        // Check if item is null or air
+        if (itemInHand == null || itemInHand.getType() == Material.AIR) {
+            return;
+        }
+        
         // Get the base material type of the item in hand
         String itemBaseMaterial = itemInHand.getType().toString();
         PSProtectBlock blockOptions = null;
         
         // Check all configured protection stones to find one with matching base material
+        // AND has the protection stone NBT tag (always required for placement)
         for (PSProtectBlock psb : ProtectionStones.getInstance().getConfiguredBlocks()) {
             String configuredBase = psb.type;
             int bracketIndex = configuredBase.indexOf('[');
@@ -109,19 +115,13 @@ public class BlockHandler {
                 configuredBase = configuredBase.substring(0, bracketIndex);
             }
             if (configuredBase.equals(itemBaseMaterial)) {
-                // Found a matching base material - now check if this specific item is valid
-                if (psb.restrictObtaining) {
-                    // Must have the NBT tag to be valid
-                    if (ProtectionStones.isProtectBlockItem(itemInHand, true)) {
-                        blockOptions = psb;
-                        break;
-                    }
-                    // else continue checking other configs
-                } else {
-                    // No restriction, any item of this material works
+                // Found a matching base material - now check if this item has the PS NBT tag
+                // Always check NBT to prevent regular blocks from creating regions
+                if (ProtectionStones.isProtectBlockItem(itemInHand, true)) {
                     blockOptions = psb;
                     break;
                 }
+                // Item doesn't have NBT tag, continue checking other configs
             }
         }
         
