@@ -4,7 +4,7 @@ pipeline {
     tools {
         // These names must match what you configured in Jenkins Global Tool Configuration
         maven 'Maven'   // Maven will be auto-downloaded by Jenkins
-        jdk 'JDK17'     // JDK will be auto-downloaded by Jenkins
+        jdk 'JDK25'     // Configure this JDK 25 installation in Jenkins Global Tool Configuration
     }
     
     options {
