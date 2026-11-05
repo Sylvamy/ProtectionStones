@@ -108,7 +108,8 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
-                    <minimizeJar>true</minimizeJar>
+                    <!-- The minimizer's bytecode analyzer cannot read Java 25 classes. -->
+                    <minimizeJar>false</minimizeJar>
                     <relocations>
                         <relocation>
                             <pattern>org.bstats</pattern>
